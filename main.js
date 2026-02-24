@@ -11,8 +11,8 @@ buttonView.addEventListener("click", () => {
 
   for (const record of records) {
     const row = tbody.insertRow();
-    row.insertCell().textContent = record.song.version;
-    row.insertCell().textContent = record.song.title;
+    row.insertCell().textContent = record.chart.song.version;
+    row.insertCell().textContent = record.chart.song.title;
     row.insertCell().textContent = record.chart.difficulty;
     row.insertCell().textContent = record.chart.level;
     row.insertCell().textContent = record.result.clearType;
@@ -42,6 +42,7 @@ function* parseIidxCsv(text) {
       }
 
       const chart = {
+        song,
         difficulty,
         level,
       };
@@ -53,7 +54,7 @@ function* parseIidxCsv(text) {
         score: row[`${difficulty} スコア`],
       };
 
-      yield { song, chart, result };
+      yield { chart, result };
     }
   }
 }
