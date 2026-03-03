@@ -34,24 +34,7 @@ const auth = getAuth(app);
 const twitterProvider = new TwitterAuthProvider();
 const db = getFirestore(app);
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    textLoginStatus.innerText = `${user.uid}でログイン中。`;
-
-    const userProfileDocRef = getUserProfileDocRef(db, user.uid);
-    const userProfileDoc = await getDocFromServer(userProfileDocRef);
-    const userProfile = userProfileDoc.data();
-    setUserProfileToForm(formProfile, userProfile);
-
-    fieldsetProfile.disabled = false;
-  } else {
-    textLoginStatus.innerText = "ログインしていません。";
-
-    clearUserProfileForm(formProfile);
-
-    fieldsetProfile.disabled = true;
-  }
-});
+onAuthStateChanged(auth, renderForUserStatus);
 
 buttonLogin.addEventListener("click", async () => {
   try {
@@ -79,6 +62,25 @@ formProfile.addEventListener("submit", async (event) => {
 
   alert("更新完了");
 });
+
+async function renderForUserStatus(authUser) {
+  if (authUser) {
+    textLoginStatus.innerText = `${authUser.uid}でログイン中。`;
+
+    const userProfileDocRef = getUserProfileDocRef(db, authUser.uid);
+    const userProfileDoc = await getDocFromServer(userProfileDocRef);
+    const userProfile = userProfileDoc.data();
+    setUserProfileToForm(formProfile, userProfile);
+
+    fieldsetProfile.disabled = false;
+  } else {
+    textLoginStatus.innerText = "ログインしていません。";
+
+    clearUserProfileForm(formProfile);
+
+    fieldsetProfile.disabled = true;
+  }
+}
 
 function getUserProfileFromForm(form) {
   const userName = form.elements["userName"].value.trim();
