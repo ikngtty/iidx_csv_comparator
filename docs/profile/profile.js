@@ -155,8 +155,8 @@ function getUserProfileFromForm(form) {
   const userName = form.elements["userName"].value.trim();
   const djName = form.elements["djName"].value.trim();
   const iidxId = form.elements["iidxId"].value.trim();
-  const csv = form.elements["csv"].value.trim();
-  return { userName, djName, iidxId, csv };
+  const playdata = form.elements["playdata"].value.trim();
+  return { userName, djName, iidxId, playdata };
 }
 
 function setUserProfileToForm(form, userProfile) {
@@ -166,7 +166,7 @@ function setUserProfileToForm(form, userProfile) {
   form.elements["userName"].value = userProfile.userName;
   form.elements["djName"].value = userProfile.djName;
   form.elements["iidxId"].value = userProfile.iidxId;
-  form.elements["csv"].value = userProfile.csv;
+  form.elements["playdata"].value = userProfile.playdata;
 }
 
 function clearUserProfileForm(form) {
@@ -186,6 +186,6 @@ function makeEmptyUserProfile() {
     userName: "",
     djName: "",
     iidxId: "",
-    csv: "",
+    playdata: "",
   };
 }
