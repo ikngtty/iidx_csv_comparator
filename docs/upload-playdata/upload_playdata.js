@@ -85,7 +85,7 @@ buttonAgree.addEventListener("click", async (event) => {
 
 async function getUserStatus(authUser) {
   if (authUser == null) {
-    return { status: "NotLoggedIn" };
+    return { status: "NotLoggedIn", isLoggedIn: false };
   }
 
   const uid = authUser.uid;
@@ -93,18 +93,24 @@ async function getUserStatus(authUser) {
   const userDoc = await getDocFromServer(userDocRef);
   const user = userDoc.data();
   if (user == null || user.agreeAt == null) {
-    return { status: "NotAgreed", uid };
+    return { status: "NotAgreed", isLoggedIn: true, uid };
   }
 
-  return { status: "Agreed", uid };
+  return { status: "Agreed", isLoggedIn: true, uid };
 }
 
 async function renderForUserStatus(userStatus) {
+  if (userStatus.isLoggedIn) {
+    const { uid } = userStatus;
+
+    textLoginStatus.innerText = `${uid}でログイン中。`;
+  } else {
+    textLoginStatus.innerText = "ログインしていません。";
+  }
+
   switch (userStatus.status) {
     case "NotLoggedIn":
       {
-        textLoginStatus.innerText = "ログインしていません。";
-
         areaConsent.style.display = "none";
 
         fieldsetProfile.disabled = true;
@@ -116,8 +122,6 @@ async function renderForUserStatus(userStatus) {
     case "Agreed":
       {
         const { uid } = userStatus;
-
-        textLoginStatus.innerText = `${uid}でログイン中。`;
 
         areaConsent.style.display = "none";
 
@@ -134,10 +138,6 @@ async function renderForUserStatus(userStatus) {
 
     case "NotAgreed":
       {
-        const { uid } = userStatus;
-
-        textLoginStatus.innerText = `${uid}でログイン中。`;
-
         areaMain.style.display = "none";
 
         checkAgree.checked = false;
