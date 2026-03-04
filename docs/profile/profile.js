@@ -14,11 +14,15 @@ import {
   setDoc,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
+const areaMain = document.getElementById("areaMain");
 const textLoginStatus = document.getElementById("textLoginStatus");
 const buttonLogin = document.getElementById("buttonLogin");
 const buttonLogout = document.getElementById("buttonLogout");
 const formProfile = document.getElementById("formProfile");
 const fieldsetProfile = document.getElementById("fieldsetProfile");
+const areaConsent = document.getElementById("areaConsent");
+const checkAgree = document.getElementById("checkAgree");
+const buttonAgree = document.getElementById("buttonAgree");
 
 const firebaseConfig = {
   apiKey: "AIzaSyAm4Yb7EfBoXXgtp-rilAkjy7XxeeA-1GU",
@@ -34,7 +38,10 @@ const auth = getAuth(app);
 const twitterProvider = new TwitterAuthProvider();
 const db = getFirestore(app);
 
-onAuthStateChanged(auth, renderForUserStatus);
+onAuthStateChanged(auth, async (authUser) => {
+  const userStatus = await getUserStatus(authUser);
+  await renderForUserStatus(userStatus);
+});
 
 buttonLogin.addEventListener("click", async () => {
   try {
@@ -63,22 +70,84 @@ formProfile.addEventListener("submit", async (event) => {
   alert("更新完了");
 });
 
-async function renderForUserStatus(authUser) {
-  if (authUser) {
-    textLoginStatus.innerText = `${authUser.uid}でログイン中。`;
+checkAgree.addEventListener("change", (event) => {
+  buttonAgree.disabled = !checkAgree.checked;
+});
 
-    const userProfileDocRef = getUserProfileDocRef(db, authUser.uid);
-    const userProfileDoc = await getDocFromServer(userProfileDocRef);
-    const userProfile = userProfileDoc.data();
-    setUserProfileToForm(formProfile, userProfile);
+buttonAgree.addEventListener("click", async (event) => {
+  const userDocRef = getUserDocRef(db, auth.currentUser.uid);
+  // TODO: 同意時刻をサーバーで設定したい
+  await setDoc(userDocRef, { agreeAt: Date.now() }, { merge: true });
 
-    fieldsetProfile.disabled = false;
-  } else {
-    textLoginStatus.innerText = "ログインしていません。";
+  const userStatus = await getUserStatus(auth.currentUser);
+  await renderForUserStatus(userStatus);
+});
 
-    clearUserProfileForm(formProfile);
+async function getUserStatus(authUser) {
+  if (authUser == null) {
+    return { status: "NotLoggedIn" };
+  }
 
-    fieldsetProfile.disabled = true;
+  const uid = authUser.uid;
+  const userDocRef = getUserDocRef(db, uid);
+  const userDoc = await getDocFromServer(userDocRef);
+  const user = userDoc.data();
+  if (user == null || user.agreeAt == null) {
+    return { status: "NotAgreed", uid };
+  }
+
+  return { status: "Agreed", uid };
+}
+
+async function renderForUserStatus(userStatus) {
+  switch (userStatus.status) {
+    case "NotLoggedIn":
+      {
+        textLoginStatus.innerText = "ログインしていません。";
+
+        areaConsent.style.display = "none";
+
+        fieldsetProfile.disabled = true;
+        clearUserProfileForm(formProfile);
+        areaMain.style.display = "block";
+      }
+      break;
+
+    case "Agreed":
+      {
+        const { uid } = userStatus;
+
+        textLoginStatus.innerText = `${uid}でログイン中。`;
+
+        areaConsent.style.display = "none";
+
+        fieldsetProfile.disabled = false;
+        {
+          const userProfileDocRef = getUserProfileDocRef(db, uid);
+          const userProfileDoc = await getDocFromServer(userProfileDocRef);
+          const userProfile = userProfileDoc.data();
+          setUserProfileToForm(formProfile, userProfile);
+        }
+        areaMain.style.display = "block";
+      }
+      break;
+
+    case "NotAgreed":
+      {
+        const { uid } = userStatus;
+
+        textLoginStatus.innerText = `${uid}でログイン中。`;
+
+        areaMain.style.display = "none";
+
+        checkAgree.checked = false;
+        buttonAgree.disabled = true;
+        areaConsent.style.display = "block";
+      }
+      break;
+
+    default:
+      throw new Error(`unexpected user status: ${userStatus}`);
   }
 }
 
@@ -102,6 +171,10 @@ function setUserProfileToForm(form, userProfile) {
 
 function clearUserProfileForm(form) {
   setUserProfileToForm(form, makeEmptyUserProfile());
+}
+
+function getUserDocRef(db, userId) {
+  return doc(db, "users", userId);
 }
 
 function getUserProfileDocRef(db, userId) {
