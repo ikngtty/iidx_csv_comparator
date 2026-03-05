@@ -54,8 +54,7 @@ const DIFFICUTY_ORDER = (() => {
   return m;
 })();
 
-const inputCsv1 = document.getElementById("inputCsv1");
-const inputCsv2 = document.getElementById("inputCsv2");
+const inputsCsv = [1, 2].map((i) => document.getElementById(`inputCsv${i}`));
 const buttonCompare = document.getElementById("buttonCompare");
 const comparisonTable = document.getElementById("comparisonTable");
 
@@ -66,7 +65,7 @@ buttonCompare.addEventListener("click", () => {
   tbody.replaceChildren();
 
   // ソート
-  const [records1, records2] = [inputCsv1, inputCsv2].map((inputCsv) => {
+  const [records1, records2] = inputsCsv.map((inputCsv) => {
     const records = [...parseIidxCsv(inputCsv.value)];
     records.sort((record1, record2) =>
       compareChart(record1.chart, record2.chart),
