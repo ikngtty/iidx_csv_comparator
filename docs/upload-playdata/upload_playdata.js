@@ -88,13 +88,14 @@ async function getUserStatus(authUser) {
     return { status: "NotLoggedIn", userInfo: null };
   }
 
-  const uid = authUser.uid;
-
-  const userDocRef = getUserDocRef(db, uid);
+  const userDocRef = getUserDocRef(db, authUser.uid);
   const userDoc = await getDocFromServer(userDocRef);
   const user = userDoc.data();
 
-  const userInfo = { uid };
+  const userInfo = {
+    uid: authUser.uid,
+    displayName: authUser.displayName,
+  };
 
   if (user == null || user.agreeAt == null) {
     return { status: "NotAgreed", userInfo };
@@ -106,9 +107,9 @@ async function renderForUserStatus(userStatus) {
   if (userStatus.userInfo == null) {
     textLoginStatus.innerText = "ログインしていません。";
   } else {
-    const { uid } = userStatus.userInfo;
+    const { displayName } = userStatus.userInfo;
 
-    textLoginStatus.innerText = `${uid}でログイン中。`;
+    textLoginStatus.innerText = `${displayName}でログイン中。`;
   }
 
   switch (userStatus.status) {
