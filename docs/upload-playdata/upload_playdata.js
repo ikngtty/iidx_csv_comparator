@@ -47,10 +47,8 @@ onAuthStateChanged(auth, async (authUser) => {
 
 buttonLogin.addEventListener("click", async () => {
   try {
-    const result = await signInWithPopup(auth, twitterProvider);
-    // console.log("result", result);
-    const additionalUserInfo = getAdditionalUserInfo(result);
-    // console.log("additional", additionalUserInfo);
+    const _result = await signInWithPopup(auth, twitterProvider);
+    // const additionalUserInfo = getAdditionalUserInfo(result);
   } catch (e) {
     console.log(e);
   }
