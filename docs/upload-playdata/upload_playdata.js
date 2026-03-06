@@ -11,6 +11,7 @@ import {
   doc,
   getDocFromServer,
   getFirestore,
+  serverTimestamp,
   setDoc,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
@@ -76,8 +77,7 @@ checkAgree.addEventListener("change", (event) => {
 
 buttonAgree.addEventListener("click", async (event) => {
   const userDocRef = getUserDocRef(db, auth.currentUser.uid);
-  // TODO: 同意時刻をサーバーで設定したい
-  await setDoc(userDocRef, { agreeAt: Date.now() }, { merge: true });
+  await setDoc(userDocRef, { agreeAt: serverTimestamp() }, { merge: true });
 
   const userStatus = await getUserStatus(auth.currentUser);
   await renderForUserStatus(userStatus);
