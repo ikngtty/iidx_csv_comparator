@@ -15,6 +15,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 import { upsertDocWithTs } from "../shared/firestore_util.js";
+import {
+  RuleJustLength,
+  RuleMaxLength,
+  RuleNumeric,
+  RuleRequired,
+} from "../shared/validation/rules.js";
+import ValidatableField from "../shared/validation/validatable_field.js";
 
 const areaMain = document.getElementById("areaMain");
 const textLoginStatus = document.getElementById("textLoginStatus");
@@ -22,6 +29,26 @@ const buttonLogin = document.getElementById("buttonLogin");
 const buttonLogout = document.getElementById("buttonLogout");
 const formProfile = document.getElementById("formProfile");
 const fieldsetProfile = document.getElementById("fieldsetProfile");
+const profileTextUserName = document.getElementById("profileTextUserName");
+const profileWarningCaptionUserName = document.getElementById(
+  "profileWarningCaptionUserName",
+);
+const profileTextDjName = document.getElementById("profileTextDjName");
+const profileWarningCaptionDjName = document.getElementById(
+  "profileWarningCaptionDjName",
+);
+const profileTextIidxId = document.getElementById("profileTextIidxId");
+const profileWarningCaptionIidxId = document.getElementById(
+  "profileWarningCaptionIidxId",
+);
+const profileTextPlaydataSp = document.getElementById("profileTextPlaydataSp");
+const profileWarningCaptionPlaydataSp = document.getElementById(
+  "profileWarningCaptionPlaydataSp",
+);
+const profileTextPlaydataDp = document.getElementById("profileTextPlaydataDp");
+const profileWarningCaptionPlaydataDp = document.getElementById(
+  "profileWarningCaptionPlaydataDp",
+);
 const areaConsent = document.getElementById("areaConsent");
 const checkAgree = document.getElementById("checkAgree");
 const buttonAgree = document.getElementById("buttonAgree");
@@ -39,6 +66,39 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const twitterProvider = new TwitterAuthProvider();
 const db = getFirestore(app);
+
+const validatableProfileUserName = new ValidatableField(
+  profileTextUserName,
+  profileWarningCaptionUserName,
+  [new RuleRequired("表示名"), new RuleMaxLength(30)],
+);
+const validatableProfileDjName = new ValidatableField(
+  profileTextDjName,
+  profileWarningCaptionDjName,
+  [new RuleMaxLength(6)],
+);
+const validatableProfileIidxId = new ValidatableField(
+  profileTextIidxId,
+  profileWarningCaptionIidxId,
+  [new RuleNumeric(), new RuleJustLength(8)],
+);
+const validatableProfilePlaydataSp = new ValidatableField(
+  profileTextPlaydataSp,
+  profileWarningCaptionPlaydataSp,
+  [new RuleMaxLength(1000000)],
+);
+const validatableProfilePlaydataDp = new ValidatableField(
+  profileTextPlaydataDp,
+  profileWarningCaptionPlaydataDp,
+  [new RuleMaxLength(1000000)],
+);
+const validatableProfileFields = [
+  validatableProfileUserName,
+  validatableProfileDjName,
+  validatableProfileIidxId,
+  validatableProfilePlaydataSp,
+  validatableProfilePlaydataDp,
+];
 
 onAuthStateChanged(auth, async (authUser) => {
   const userStatus = await getUserStatus(authUser);
@@ -61,7 +121,17 @@ buttonLogout.addEventListener("click", () => {
 formProfile.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  // TODO: validate
+  // バリデーションチェック
+  validatableProfileFields.forEach((field) => {
+    field.clearWarning();
+  });
+  const isInvalids = validatableProfileFields.map((field) =>
+    field.warnIfInvalid(),
+  );
+  if (isInvalids.some((isInvalid) => isInvalid)) {
+    return;
+  }
+
   const userProfile = getUserProfileFromForm(formProfile);
   const userProfileDocRef = getUserProfileDocRef(db, auth.currentUser.uid);
   await upsertDocWithTs(userProfileDocRef, userProfile);

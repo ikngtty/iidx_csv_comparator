@@ -15,11 +15,16 @@
     <div id="areaMain">
       <form id="formProfile">
         <fieldset id="fieldsetProfile" disabled>
-          表示名: <input type="text" name="userName"><br>
-          DJ NAME: <input type="text" name="djName"><br>
-          IIDX ID (数字のみ8桁): <input type="text" name="iidxId"><br>
-          プレーデータCSV（SP）: <textarea name="playdataSp"></textarea><br>
-          プレーデータCSV（DP）: <textarea name="playdataDp"></textarea><br>
+          表示名<span class="requiredMark">*</span>: <input type="text" name="userName" id="profileTextUserName">
+          <span id="profileWarningCaptionUserName" class="warningCaption"></span><br>
+          DJ NAME: <input type="text" name="djName" id="profileTextDjName">
+          <span id="profileWarningCaptionDjName" class="warningCaption"></span><br>
+          IIDX ID (数字のみ8桁): <input type="text" name="iidxId" id="profileTextIidxId" inputmode="numeric">
+          <span id="profileWarningCaptionIidxId" class="warningCaption"></span><br>
+          プレーデータCSV（SP）: <textarea name="playdataSp" id="profileTextPlaydataSp"></textarea>
+          <span id="profileWarningCaptionPlaydataSp" class="warningCaption"></span><br>
+          プレーデータCSV（DP）: <textarea name="playdataDp" id="profileTextPlaydataDp"></textarea>
+          <span id="profileWarningCaptionPlaydataDp" class="warningCaption"></span><br>
           <input type="submit" value="更新">
         </fieldset>
       </form>
