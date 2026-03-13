@@ -14,14 +14,14 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-import { upsertDocWithTs } from "../shared/firestore_util.js";
+import { upsertDocWithTs } from "../_shared/firestore_util.js";
 import {
   RuleJustLength,
   RuleMaxLength,
   RuleNumeric,
   RuleRequired,
-} from "../shared/validation/rules.js";
-import ValidatableField from "../shared/validation/validatable_field.js";
+} from "../_shared/validation/rules.js";
+import ValidatableField from "../_shared/validation/validatable_field.js";
 
 const areaMain = document.getElementById("areaMain");
 const textLoginStatus = document.getElementById("textLoginStatus");
