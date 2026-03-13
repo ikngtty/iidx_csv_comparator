@@ -56,10 +56,10 @@ const DIFFICUTY_ORDER = (() => {
 
 const inputsCsv = [1, 2].map((i) => document.getElementById(`inputCsv${i}`));
 const buttonCompare = document.getElementById("buttonCompare");
-const comparisonTable = document.getElementById("comparisonTable");
+const tableComparison = document.getElementById("tableComparison");
 
 buttonCompare.addEventListener("click", () => {
-  const tbody = comparisonTable.tBodies[0];
+  const tbody = tableComparison.tBodies[0];
 
   // テーブルのリセット
   tbody.replaceChildren();
