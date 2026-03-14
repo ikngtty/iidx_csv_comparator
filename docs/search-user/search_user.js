@@ -5,7 +5,7 @@ import {
   getFirestore,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-import { CONFIG as FIREBASE_CONFIG } from "../_shared/firebase_util.js";
+import { CONFIG as FIREBASE_CONFIG } from "../shared/firebase_util.js";
 
 const buttonSearch = document.getElementById("buttonSearch");
 const tableUsers = document.getElementById("tableUsers");
