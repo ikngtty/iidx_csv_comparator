@@ -110,6 +110,8 @@ buttonLogout.addEventListener("click", () => {
   signOut(auth);
 });
 
+// TODO: プロフィールの登録とCSVのアップロードは別々にしたい。
+// （明らかに更新するタイミングの違うデータなので。）
 formProfile.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -124,9 +126,16 @@ formProfile.addEventListener("submit", async (event) => {
     return;
   }
 
-  const userProfile = getUserProfileFromForm(formProfile);
+  const { userProfile, playdataSp, playdataDp } =
+    getDataFromUserProfileForm(formProfile);
+  // TODO: 登録が一部だけ成功すると画面の状態が意味不明になる
   const userProfileDocRef = getUserProfileDocRef(db, auth.currentUser.uid);
   await upsertDocWithTs(userProfileDocRef, userProfile);
+  // TODO: テキストが空ならデータを削除したい
+  const playdataSpDocRef = getPlaydataDocRef(db, auth.currentUser.uid, "sp");
+  await upsertDocWithTs(playdataSpDocRef, playdataSp);
+  const playdataDpDocRef = getPlaydataDocRef(db, auth.currentUser.uid, "dp");
+  await upsertDocWithTs(playdataDpDocRef, playdataDp);
 
   alert("更新完了");
 });
@@ -193,11 +202,25 @@ async function renderForUserStatus(userStatus) {
 
         fieldsetProfile.disabled = false;
         // TODO: 取得に失敗したら更新ボタン押せなくする（空白データで上書き更新する事故の防止）
+        // TODO: いちいちawaitしないでまとめてawaitしたい。
         {
           const userProfileDocRef = getUserProfileDocRef(db, uid);
           const userProfileDoc = await getDocFromServer(userProfileDocRef);
           const userProfile = userProfileDoc.data();
-          setUserProfileToForm(formProfile, userProfile);
+
+          const playdataSpDocRef = getPlaydataDocRef(db, uid, "sp");
+          const playdataSpDoc = await getDocFromServer(playdataSpDocRef);
+          const playdataSp = playdataSpDoc.data();
+
+          const playdataDpDocRef = getPlaydataDocRef(db, uid, "dp");
+          const playdataDpDoc = await getDocFromServer(playdataDpDocRef);
+          const playdataDp = playdataDpDoc.data();
+
+          setDataToUserProfileForm(formProfile, {
+            userProfile,
+            playdataSp,
+            playdataDp,
+          });
         }
         areaMain.style.display = "block";
       }
@@ -218,28 +241,36 @@ async function renderForUserStatus(userStatus) {
   }
 }
 
-function getUserProfileFromForm(form) {
+function getDataFromUserProfileForm(form) {
   const userName = form.elements["userName"].value.trim();
   const djName = form.elements["djName"].value.trim();
   const iidxId = form.elements["iidxId"].value.trim();
   const playdataSp = form.elements["playdataSp"].value.trim();
   const playdataDp = form.elements["playdataDp"].value.trim();
-  return { userName, djName, iidxId, playdataSp, playdataDp };
+  return {
+    userProfile: { userName, djName, iidxId },
+    playdataSp: { data: playdataSp },
+    playdataDp: { data: playdataDp },
+  };
 }
 
-function setUserProfileToForm(form, userProfile) {
-  if (userProfile == null) {
-    userProfile = makeEmptyUserProfile();
-  }
+function setDataToUserProfileForm(form, formData) {
+  const empty = makeEmptyUserProfileFormData();
+  const {
+    userProfile = empty.userProfile,
+    playdataSp = empty.playdataSp,
+    playdataDp = empty.playdataDp,
+  } = formData;
+
   form.elements["userName"].value = userProfile.userName;
   form.elements["djName"].value = userProfile.djName;
   form.elements["iidxId"].value = userProfile.iidxId;
-  form.elements["playdataSp"].value = userProfile.playdataSp;
-  form.elements["playdataDp"].value = userProfile.playdataDp;
+  form.elements["playdataSp"].value = playdataSp.data;
+  form.elements["playdataDp"].value = playdataDp.data;
 }
 
 function clearUserProfileForm(form) {
-  setUserProfileToForm(form, makeEmptyUserProfile());
+  setDataToUserProfileForm(form, makeEmptyUserProfileFormData());
 }
 
 function getUserDocRef(db, userId) {
@@ -250,12 +281,18 @@ function getUserProfileDocRef(db, userId) {
   return doc(db, "userProfiles", userId);
 }
 
-function makeEmptyUserProfile() {
+function getPlaydataDocRef(db, userId, playside) {
+  return doc(db, "playdata", `${userId}:${playside}`);
+}
+
+function makeEmptyUserProfileFormData() {
   return {
-    userName: "",
-    djName: "",
-    iidxId: "",
-    playdataSp: "",
-    playdataDp: "",
+    userProfile: {
+      userName: "",
+      djName: "",
+      iidxId: "",
+    },
+    playdataSp: { data: "" },
+    playdataDp: { data: "" },
   };
 }

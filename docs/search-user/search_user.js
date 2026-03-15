@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import {
   collection,
+  doc,
+  getDocFromServer,
   getDocsFromServer,
   getFirestore,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
@@ -23,25 +25,36 @@ buttonSearch.addEventListener("click", async () => {
     collection(db, "userProfiles"),
   );
 
-  userProfilesSnapshot.forEach((doc) => {
-    const userProfile = doc.data();
+  userProfilesSnapshot.forEach((userProfileDoc) => {
+    const userProfile = userProfileDoc.data();
+    const userId = userProfileDoc.id;
 
     const row = tbody.insertRow();
     row.insertCell().textContent = userProfile.userName;
     row.insertCell().textContent = userProfile.djName;
     row.insertCell().textContent = userProfile.iidxId;
+    // TODO: CSVのアップロード更新日時を出す
     row.insertCell().textContent = userProfile.updatedAt
       .toDate()
       .toLocaleString();
     const buttonsToCompareCell = row.insertCell();
     [
-      ["SP", userProfile.playdataSp],
-      ["DP", userProfile.playdataDp],
-    ].forEach(([playside, playdata]) => {
+      ["sp", "SP"],
+      ["dp", "DP"],
+    ].forEach(([playside, playsideLabel]) => {
       [1, 2].forEach((iPlayer) => {
         const button = document.createElement("button");
-        button.textContent = `${playside}のデータをPlayer${iPlayer}にセット`;
-        button.addEventListener("click", () => {
+        button.textContent = `${playsideLabel}のデータをPlayer${iPlayer}にセット`;
+        button.addEventListener("click", async () => {
+          const playdataDocRef = getPlaydataDocRef(db, userId, playside);
+          const playdataDoc = await getDocFromServer(playdataDocRef);
+          // TODO: データがない時はそもそも押せなくする
+          if (!playdataDoc.exists()) {
+            alert("データがありません。");
+            return;
+          }
+          const playdata = playdataDoc.data().data;
+
           localStorage.setItem(`iidxComparator.csv${iPlayer}`, playdata);
           location.href = "../compare-playdata/";
         });
@@ -51,3 +64,8 @@ buttonSearch.addEventListener("click", async () => {
     });
   });
 });
+
+// TODO: 共通化
+function getPlaydataDocRef(db, userId, playside) {
+  return doc(db, "playdata", `${userId}:${playside}`);
+}
