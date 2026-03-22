@@ -100,12 +100,12 @@ const validatableProfileFields = [
 const validatablePlaydataSp = new ValidatableField(
   textPlaydataSp,
   warningCaptionPlaydataSp,
-  [new RuleMaxLength(500000)],
+  [new RuleRequired("プレーデータ（SP）"), new RuleMaxLength(500000)],
 );
 const validatablePlaydataDp = new ValidatableField(
   textPlaydataDp,
   warningCaptionPlaydataDp,
-  [new RuleMaxLength(500000)],
+  [new RuleRequired("プレーデータ（DP）"), new RuleMaxLength(500000)],
 );
 
 onAuthStateChanged(auth, async (authUser) => {
