@@ -383,6 +383,8 @@ function renderForUserProfile(userProfile) {
     buttonDeleteProfile.disabled = false;
     fieldsetPlaydataSp.disabled = false;
     fieldsetPlaydataDp.disabled = false;
+    buttonDeletePlaydataSp.disabled = userProfile.playdataSpUploadedAt == null;
+    buttonDeletePlaydataDp.disabled = userProfile.playdataDpUploadedAt == null;
   }
 }
 
