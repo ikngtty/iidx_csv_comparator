@@ -55,7 +55,6 @@ const textPlaydataSp = document.getElementById("textPlaydataSp");
 const warningCaptionPlaydataSp = document.getElementById(
   "warningCaptionPlaydataSp",
 );
-const submitPlaydataSp = document.getElementById("submitPlaydataSp");
 const buttonDeletePlaydataSp = document.getElementById(
   "buttonDeletePlaydataSp",
 );
@@ -65,7 +64,6 @@ const textPlaydataDp = document.getElementById("textPlaydataDp");
 const warningCaptionPlaydataDp = document.getElementById(
   "warningCaptionPlaydataDp",
 );
-const submitPlaydataDp = document.getElementById("submitPlaydataDp");
 const buttonDeletePlaydataDp = document.getElementById(
   "buttonDeletePlaydataDp",
 );
@@ -165,9 +163,7 @@ formPlaydataSp.addEventListener("submit", async (event) => {
   const playdataSpDocRef = getPlaydataDocRef(db, auth.currentUser.uid, "sp");
   await upsertDocWithTs(playdataSpDocRef, playdataSp);
 
-  renderForPlaydataSp(playdataSp);
-
-  alert("更新完了");
+  alert("アップロード完了");
 });
 
 formPlaydataDp.addEventListener("submit", async (event) => {
@@ -183,9 +179,7 @@ formPlaydataDp.addEventListener("submit", async (event) => {
   const playdataDpDocRef = getPlaydataDocRef(db, auth.currentUser.uid, "dp");
   await upsertDocWithTs(playdataDpDocRef, playdataDp);
 
-  renderForPlaydataDp(playdataDp);
-
-  alert("更新完了");
+  alert("アップロード完了");
 });
 
 buttonDeleteProfile.addEventListener("click", (event) => {
@@ -211,8 +205,6 @@ buttonDeletePlaydataSp.addEventListener("click", (event) => {
   // NOTE: awaitしない方が良いらしい。
   deleteDoc(playdataSpDocRef);
 
-  renderForPlaydataSp(null);
-
   alert("プレーデータ（SP）を削除しました。");
 });
 
@@ -224,8 +216,6 @@ buttonDeletePlaydataDp.addEventListener("click", (event) => {
   const playdataDpDocRef = getPlaydataDocRef(db, auth.currentUser.uid, "dp");
   // NOTE: awaitしない方が良いらしい。
   deleteDoc(playdataDpDocRef);
-
-  renderForPlaydataDp(null);
 
   alert("プレーデータ（DP）を削除しました。");
 });
@@ -292,24 +282,11 @@ async function renderForUserStatus(userStatus) {
 
         allFields.forEach((field) => (field.disabled = false));
         // TODO: 取得に失敗したら更新ボタン押せなくする（空白データで上書き更新する事故の防止）
-        // TODO: いちいちawaitしないでまとめてawaitしたい。
         {
           const userProfileDocRef = getUserProfileDocRef(db, uid);
           const userProfileDoc = await getDocFromServer(userProfileDocRef);
           const userProfile = userProfileDoc.data();
           renderForUserProfile(userProfile);
-        }
-        {
-          const playdataSpDocRef = getPlaydataDocRef(db, uid, "sp");
-          const playdataSpDoc = await getDocFromServer(playdataSpDocRef);
-          const playdataSp = playdataSpDoc.data();
-          renderForPlaydataSp(playdataSp);
-        }
-        {
-          const playdataDpDocRef = getPlaydataDocRef(db, uid, "dp");
-          const playdataDpDoc = await getDocFromServer(playdataDpDocRef);
-          const playdataDp = playdataDpDoc.data();
-          renderForPlaydataDp(playdataDp);
         }
         areaMain.style.display = "block";
       }
@@ -339,28 +316,6 @@ function renderForUserProfile(userProfile) {
     buttonDeleteProfile.disabled = false;
   }
   setDataToFormUserProfile(userProfile ?? makeEmptyUserProfile());
-}
-
-function renderForPlaydataSp(playdataSp) {
-  if (playdataSp == null) {
-    submitPlaydataSp.value = "登録";
-    buttonDeletePlaydataSp.disabled = true;
-  } else {
-    submitPlaydataSp.value = "更新";
-    buttonDeletePlaydataSp.disabled = false;
-  }
-  setDataToFormPlaydataSp(playdataSp ?? makeEmptyPlaydataSp());
-}
-
-function renderForPlaydataDp(playdataDp) {
-  if (playdataDp == null) {
-    submitPlaydataDp.value = "登録";
-    buttonDeletePlaydataDp.disabled = true;
-  } else {
-    submitPlaydataDp.value = "更新";
-    buttonDeletePlaydataDp.disabled = false;
-  }
-  setDataToFormPlaydataDp(playdataDp ?? makeEmptyPlaydataDp());
 }
 
 function getDataFromFormUserProfile() {

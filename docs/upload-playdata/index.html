@@ -17,6 +17,7 @@
 
     <div id="areaMain">
       <form id="formProfile">
+        <h2>プロフィール</h2>
         <fieldset id="fieldsetProfile" disabled>
           表示名<span class="requiredMark">*</span>: <input type="text" name="userName" id="profileTextUserName">
           <span id="profileWarningCaptionUserName" class="warningCaption"></span><br>
@@ -30,19 +31,23 @@
       </form>
 
       <form id="formPlaydataSp">
+        <h2>プレーデータCSV（SP）</h2>
         <fieldset id="fieldsetPlaydataSp" disabled>
-          プレーデータCSV（SP）: <textarea name="playdataSp" id="textPlaydataSp"></textarea>
+          <textarea name="playdataSp" id="textPlaydataSp"></textarea>
           <span id="warningCaptionPlaydataSp" class="warningCaption"></span><br>
-          <input id="submitPlaydataSp" type="submit" value="登録">
+          <input id="submitPlaydataSp" type="submit" value="アップロード"><br>
+          <br>
           <button id="buttonDeletePlaydataSp">削除</button>
         </fieldset>
       </form>
 
       <form id="formPlaydataDp">
+        <h2>プレーデータCSV（DP）</h2>
         <fieldset id="fieldsetPlaydataDp" disabled>
-          プレーデータCSV（DP）: <textarea name="playdataDp" id="textPlaydataDp"></textarea>
+          <textarea name="playdataDp" id="textPlaydataDp"></textarea>
           <span id="warningCaptionPlaydataDp" class="warningCaption"></span><br>
-          <input id="submitPlaydataDp" type="submit" value="登録">
+          <input id="submitPlaydataDp" type="submit" value="アップロード"><br>
+          <br>
           <button id="buttonDeletePlaydataDp">削除</button>
         </fieldset>
       </form>
