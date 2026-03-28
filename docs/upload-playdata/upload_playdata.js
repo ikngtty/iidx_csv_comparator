@@ -11,6 +11,7 @@ import {
   deleteDoc,
   getDocFromServer,
   getFirestore,
+  runTransaction,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
@@ -187,9 +188,16 @@ buttonDeleteProfile.addEventListener("click", (event) => {
 
   if (!confirm("プロフィールを削除しますか？")) return;
 
-  const userProfileDocRef = getUserProfileDocRef(db, auth.currentUser.uid);
-  // NOTE: awaitしない方が良いらしい。
-  deleteDoc(userProfileDocRef);
+  const uid = auth.currentUser.uid;
+  const userProfileDocRef = getUserProfileDocRef(db, uid);
+  const playdataSpDocRef = getPlaydataDocRef(db, uid, "sp");
+  const playdataDpDocRef = getPlaydataDocRef(db, uid, "dp");
+  runTransaction(db, async (tx) => {
+    // WARNING: deleteはawaitしない方がいいってドキュメントにはある。
+    await tx.delete(userProfileDocRef);
+    await tx.delete(playdataSpDocRef);
+    await tx.delete(playdataDpDocRef);
+  });
 
   renderForUserProfile(null);
 
