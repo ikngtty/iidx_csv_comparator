@@ -33,6 +33,7 @@ import {
   getUserProfileFromServer,
   getPlaydataDocRef,
 } from "../shared/repository.js";
+import { firestoreTimestampToString } from "../shared/util.js";
 
 const areaMain = document.getElementById("areaMain");
 const textLoginStatus = document.getElementById("textLoginStatus");
@@ -374,10 +375,12 @@ function renderForUserProfile(userProfile) {
     fieldsetPlaydataDp.disabled = true;
   } else {
     setDataToFormUserProfile(userProfile);
-    spanPlaydataSpUploadedAt.innerText =
-      userProfile.playdataSpUploadedAt?.toDate().toLocaleString() ?? "---";
-    spanPlaydataDpUploadedAt.innerText =
-      userProfile.playdataDpUploadedAt?.toDate().toLocaleString() ?? "---";
+    spanPlaydataSpUploadedAt.innerText = firestoreTimestampToString(
+      userProfile.playdataSpUploadedAt,
+    );
+    spanPlaydataDpUploadedAt.innerText = firestoreTimestampToString(
+      userProfile.playdataDpUploadedAt,
+    );
 
     submitProfile.value = "更新";
     buttonDeleteProfile.disabled = false;
@@ -430,12 +433,12 @@ function clearFormUserProfile() {
 }
 
 function clearFormPlaydataSp() {
-  spanPlaydataSpUploadedAt.innerText = "---";
+  spanPlaydataSpUploadedAt.innerText = firestoreTimestampToString(null);
   setDataToFormPlaydataSp(makeEmptyPlaydataSp());
 }
 
 function clearFormPlaydataDp() {
-  spanPlaydataDpUploadedAt.innerText = "---";
+  spanPlaydataDpUploadedAt.innerText = firestoreTimestampToString(null);
   setDataToFormPlaydataDp(makeEmptyPlaydataDp());
 }
 
