@@ -1,5 +1,4 @@
-import { compareChart, parseIidxCsv } from "../shared/iidx.js";
-import { checkCsv } from "../shared/util.js";
+import { checkIidxCsv, compareChart, parseIidxCsv } from "../shared/iidx.js";
 
 const inputsCsv = [1, 2].map((i) => document.getElementById(`inputCsv${i}`));
 const buttonCompare = document.getElementById("buttonCompare");
@@ -28,9 +27,8 @@ buttonCompare.addEventListener("click", () => {
 
   // バリデーションチェック
   // TODO: ValidatableFieldの使用
-  // TODO: IIDX固有のチェック
   inputsCsv.forEach((inputCsv, i) => {
-    const checkedResult = checkCsv(inputCsv.value);
+    const checkedResult = checkIidxCsv(inputCsv.value);
     if (!checkedResult.isValid) {
       alert(`Player${i + 1}のCSV読み込み中にエラーが発生しました。`);
       throw new Error(

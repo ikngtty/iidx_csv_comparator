@@ -1,4 +1,4 @@
-import { parseCsv } from "./util.js";
+import { checkCsv, parseCsv } from "./util.js";
 
 export const VERSION_NAMES = [
   "1st&substream",
@@ -61,6 +61,45 @@ const DIFFICUTY_ORDER = (() => {
 })();
 
 const SONG_TITLE_COLLATOR = new Intl.Collator("ja");
+
+export function checkIidxCsv(text) {
+  const csvCheckedResult = checkCsv(text);
+  if (!csvCheckedResult.isValid) {
+    return csvCheckedResult;
+  }
+
+  const headerNames = (() => {
+    let headerEndIndex = text.indexOf("\n");
+    if (headerEndIndex === -1) {
+      headerEndIndex = text.length;
+    }
+    return text.slice(0, headerEndIndex).split(",");
+  })();
+
+  const expectedHeaderNames = ["バージョン", "タイトル"];
+  expectedHeaderNames.push(
+    ...DIFFICULTIES.flatMap((dif) => [
+      `${dif} 難易度`,
+      `${dif} クリアタイプ`,
+      `${dif} ミスカウント`,
+      `${dif} DJ LEVEL`,
+      `${dif} スコア`,
+    ]),
+  );
+
+  for (const expectedHeaderName of expectedHeaderNames) {
+    if (!headerNames.includes(expectedHeaderName)) {
+      return {
+        isValid: false,
+        line: 0,
+        error: `Missing header: ${expectedHeaderName}`,
+      };
+    }
+  }
+
+  // TODO: 各項目の型チェック
+  return { isValid: true };
+}
 
 export function* parseIidxCsv(text) {
   for (const row of parseCsv(text)) {
