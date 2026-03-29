@@ -1,3 +1,5 @@
+import { parseCsv } from "../shared/util.js";
+
 const VERSION_NAMES = [
   "1st&substream",
   "2nd style",
@@ -223,40 +225,5 @@ function* parseIidxCsv(text) {
 
       yield { chart, result };
     }
-  }
-}
-
-function* parseCsv(text) {
-  const lines = readLines(text);
-
-  const { done, value: header } = lines.next();
-  if (done) {
-    throw new Error("No header");
-  }
-  const headerNames = header.split(",");
-
-  for (const line of lines) {
-    if (line === "") {
-      continue;
-    }
-
-    const items = line.split(",");
-    if (items.length !== headerNames.length) {
-      throw new Error("Different column count");
-    }
-
-    yield Object.fromEntries(headerNames.map((h, i) => [h, items[i]]));
-  }
-}
-
-function* readLines(text) {
-  let start = 0;
-  let end;
-  while ((end = text.indexOf("\n", start)) !== -1) {
-    yield text.slice(start, end);
-    start = end + 1;
-  }
-  if (start < text.length) {
-    yield text.slice(start);
   }
 }
