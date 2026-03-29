@@ -79,72 +79,30 @@ buttonCompare.addEventListener("click", () => {
   // テーブルのリセット
   tbody.replaceChildren();
 
-  // ソート
-  const [records1, records2] = inputsCsv.map((inputCsv) => {
-    const records = [...parseIidxCsv(inputCsv.value)];
-    records.sort((record1, record2) =>
-      compareChart(record1.chart, record2.chart),
-    );
-    return records;
-  });
+  const [records1, records2] = inputsCsv.map((inputCsv) =>
+    parseIidxCsv(inputCsv.value),
+  );
 
-  // 記録を比較しようとして双方の曲が違った時に、どちらを先に処理するか判断するための比較関数
-  const compare = (record1, record2) => {
-    // nullが常に大きい
-    if (record1 == null) {
-      return 1;
-    } else if (record2 == null) {
-      return -1;
-    }
-
-    return compareChart(record1.chart, record2.chart);
-  };
-
-  // テーブルの構築
-  {
-    let [i1, i2] = [0, 0];
-    while (i1 < records1.length || i2 < records2.length) {
-      const [record1, record2] = [records1[i1], records2[i2]];
-
-      const delta = compare(record1, record2);
-      switch (true) {
-        case delta < 0:
-          addComparisonRow(tbody, record1.chart, record1.result, null);
-          i1++;
-          break;
-        case delta > 0:
-          addComparisonRow(tbody, record2.chart, null, record2.result);
-          i2++;
-          break;
-        default:
-          addComparisonRow(
-            tbody,
-            record1.chart,
-            record1.result,
-            record2.result,
-          );
-          i1++;
-          i2++;
-          break;
-      }
-    }
+  const comparisons = makeRecordComparisons(compareChart, records1, records2);
+  for (const comparison of comparisons) {
+    addComparisonRow(tbody, comparison);
   }
 });
 
-function addComparisonRow(tbody, chart, result1, result2) {
+function addComparisonRow(tbody, comparison) {
   const row = tbody.insertRow();
-  row.insertCell().textContent = chart.song.version;
-  row.insertCell().textContent = chart.song.title;
-  row.insertCell().textContent = chart.difficulty;
-  row.insertCell().textContent = chart.level;
-  row.insertCell().textContent = result1?.clearType;
-  row.insertCell().textContent = result2?.clearType;
-  row.insertCell().textContent = result1?.missCount;
-  row.insertCell().textContent = result2?.missCount;
-  row.insertCell().textContent = result1?.djLevel;
-  row.insertCell().textContent = result2?.djLevel;
-  row.insertCell().textContent = result1?.score;
-  row.insertCell().textContent = result2?.score;
+  row.insertCell().textContent = comparison.chart.song.version;
+  row.insertCell().textContent = comparison.chart.song.title;
+  row.insertCell().textContent = comparison.chart.difficulty;
+  row.insertCell().textContent = comparison.chart.level;
+  row.insertCell().textContent = comparison.result1?.clearType;
+  row.insertCell().textContent = comparison.result2?.clearType;
+  row.insertCell().textContent = comparison.result1?.missCount;
+  row.insertCell().textContent = comparison.result2?.missCount;
+  row.insertCell().textContent = comparison.result1?.djLevel;
+  row.insertCell().textContent = comparison.result2?.djLevel;
+  row.insertCell().textContent = comparison.result1?.score;
+  row.insertCell().textContent = comparison.result2?.score;
 }
 
 function compareChart(chart1, chart2) {
@@ -181,6 +139,60 @@ function compareSong(song1, song2) {
   }
 
   return SONG_TITLE_COLLATOR.compare(song1.title, song2.title);
+}
+
+function* makeRecordComparisons(compareChart, records1, records2) {
+  // ソート
+  const [sortedRecords1, sortedRecords2] = [records1, records2].map((records) =>
+    [...records].sort((left, right) => compareChart(left.chart, right.chart)),
+  );
+
+  // 記録を比較しようとして双方の曲が違った時に、どちらを先に処理するか判断するための比較関数
+  const compare = (record1, record2) => {
+    // nullが常に大きい
+    if (record1 == null) {
+      return 1;
+    } else if (record2 == null) {
+      return -1;
+    }
+
+    return compareChart(record1.chart, record2.chart);
+  };
+
+  // 片方に無い曲を補完しながら比較を生成
+  let [i1, i2] = [0, 0];
+  while (i1 < sortedRecords1.length || i2 < sortedRecords2.length) {
+    const [record1, record2] = [sortedRecords1[i1], sortedRecords2[i2]];
+
+    const delta = compare(record1, record2);
+    switch (true) {
+      case delta < 0:
+        yield makeRecordComparison(record1.chart, record1.result, null);
+        i1++;
+        break;
+      case delta > 0:
+        yield makeRecordComparison(record2.chart, null, record2.result);
+        i2++;
+        break;
+      default:
+        yield makeRecordComparison(
+          record1.chart,
+          record1.result,
+          record2.result,
+        );
+        i1++;
+        i2++;
+        break;
+    }
+  }
+}
+
+function makeRecordComparison(chart, result1, result2) {
+  return {
+    chart,
+    result1,
+    result2,
+  };
 }
 
 function* parseIidxCsv(text) {
