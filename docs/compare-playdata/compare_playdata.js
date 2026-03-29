@@ -1,8 +1,20 @@
-import { checkIidxCsv, compareChart, parseIidxCsv } from "../shared/iidx.js";
+import { compareChart, parseIidxCsv } from "../shared/iidx.js";
+import ValidatableField from "../shared/validation/validatable_field.js";
+import { RuleIidxCsv } from "../shared/validation/rules/iidx.js";
 
 const inputsCsv = [1, 2].map((i) => document.getElementById(`inputCsv${i}`));
+const warningCaptionsCsv = [1, 2].map((i) =>
+  document.getElementById(`warningCaptionCsv${i}`),
+);
 const buttonCompare = document.getElementById("buttonCompare");
 const tableComparison = document.getElementById("tableComparison");
+
+const validatableInputsCsv = [1, 2].map(
+  (i) =>
+    new ValidatableField(inputsCsv[i - 1], warningCaptionsCsv[i - 1], [
+      new RuleIidxCsv(),
+    ]),
+);
 
 {
   inputsCsv.forEach((inputCsv, i) => {
@@ -20,22 +32,20 @@ inputsCsv.forEach((inputCsv, i) => {
 });
 
 buttonCompare.addEventListener("click", () => {
+  // バリデーションチェック
+  for (const validatable of validatableInputsCsv) {
+    validatable.clearWarning();
+  }
+  for (const validatable of validatableInputsCsv) {
+    if (validatable.warnIfInvalid()) {
+      return;
+    }
+  }
+
   const tbody = tableComparison.tBodies[0];
 
   // テーブルのリセット
   tbody.replaceChildren();
-
-  // バリデーションチェック
-  // TODO: ValidatableFieldの使用
-  inputsCsv.forEach((inputCsv, i) => {
-    const checkedResult = checkIidxCsv(inputCsv.value);
-    if (!checkedResult.isValid) {
-      alert(`Player${i + 1}のCSV読み込み中にエラーが発生しました。`);
-      throw new Error(
-        `invalid csv${i + 1} at line ${checkedResult.line}: ${checkedResult.error}`,
-      );
-    }
-  });
 
   const [records1, records2] = inputsCsv.map((inputCsv) =>
     parseIidxCsv(inputCsv.value),
