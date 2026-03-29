@@ -8,6 +8,7 @@ import {
 
 import { CONFIG as FIREBASE_CONFIG } from "../shared/firebase_util.js";
 import { getPlaydataDocRef } from "../shared/repository.js";
+import { firestoreTimestampToString } from "../shared/util.js";
 
 const buttonSearch = document.getElementById("buttonSearch");
 const tableUsers = document.getElementById("tableUsers");
@@ -33,10 +34,20 @@ buttonSearch.addEventListener("click", async () => {
     row.insertCell().textContent = userProfile.userName;
     row.insertCell().textContent = userProfile.djName;
     row.insertCell().textContent = userProfile.iidxId;
-    // TODO: CSVのアップロード更新日時を出す
-    row.insertCell().textContent = userProfile.updatedAt
-      .toDate()
-      .toLocaleString();
+
+    const uploadedAtCell = row.insertCell();
+    uploadedAtCell.appendChild(
+      document.createTextNode(
+        firestoreTimestampToString(userProfile.playdataSpUploadedAt),
+      ),
+    );
+    uploadedAtCell.appendChild(document.createElement("br"));
+    uploadedAtCell.appendChild(
+      document.createTextNode(
+        firestoreTimestampToString(userProfile.playdataDpUploadedAt),
+      ),
+    );
+
     const buttonsToCompareCell = row.insertCell();
     [
       ["sp", "SP"],
