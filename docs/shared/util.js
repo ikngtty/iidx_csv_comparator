@@ -1,3 +1,34 @@
+export function checkCsv(text) {
+  const lines = readLines(text);
+
+  const { done, value: header } = lines.next();
+  if (done) {
+    return { isValid: false, line: 0, error: "No header" };
+  }
+  const headerNames = header.split(",");
+
+  {
+    let lineIndex = 0;
+    for (const line of lines) {
+      lineIndex++;
+      if (line === "") {
+        continue;
+      }
+
+      const items = line.split(",");
+      if (items.length !== headerNames.length) {
+        return {
+          isValid: false,
+          line: lineIndex,
+          error: "Different column count",
+        };
+      }
+    }
+  }
+
+  return { isValid: true };
+}
+
 export function* parseCsv(text) {
   const lines = readLines(text);
 
