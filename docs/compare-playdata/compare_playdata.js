@@ -71,6 +71,7 @@ function addComparisonRow(tbody, comparison) {
   row.insertCell().textContent = comparison.result2?.djLevel;
   row.insertCell().textContent = comparison.result1?.score;
   row.insertCell().textContent = comparison.result2?.score;
+  row.insertCell().textContent = comparison.scoreDiff;
 }
 
 function* makeRecordComparisons(compareChart, records1, records2) {
@@ -120,9 +121,17 @@ function* makeRecordComparisons(compareChart, records1, records2) {
 }
 
 function makeRecordComparison(chart, result1, result2) {
+  const scoreDiff =
+    result1 == null ||
+    result1.score == 0 ||
+    result2 == null ||
+    result2.score == 0
+      ? null
+      : result1.score - result2.score;
   return {
     chart,
     result1,
     result2,
+    scoreDiff,
   };
 }
