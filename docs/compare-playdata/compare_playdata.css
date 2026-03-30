@@ -1,3 +1,23 @@
+.beginner {
+  background-color: #80d880;
+}
+
+.normal {
+  background-color: #80b0f0;
+}
+
+.hyper {
+  background-color: #ffe000;
+}
+
+.another {
+  background-color: #ff6060;
+}
+
+.leggendaria {
+  background-color: #c080e0;
+}
+
 .noplay {
   background-color: #b8b8b8;
 }

@@ -61,7 +61,13 @@ function addComparisonRow(tbody, comparison) {
   const row = tbody.insertRow();
   row.insertCell().textContent = comparison.chart.song.version;
   row.insertCell().textContent = comparison.chart.song.title;
-  row.insertCell().textContent = comparison.chart.difficulty;
+
+  const difficultyCell = row.insertCell();
+  difficultyCell.textContent = comparison.chart.difficulty;
+  difficultyCell.classList.add(
+    getClassNameForDifficulty(comparison.chart.difficulty),
+  );
+
   row.insertCell().textContent = comparison.chart.level;
 
   const clearType1Cell = row.insertCell();
@@ -93,6 +99,23 @@ function addComparisonRow(tbody, comparison) {
   score2Cell.classList.add(comparison.scoreWinLose2);
 
   row.insertCell().textContent = comparison.scoreDiff;
+}
+
+function getClassNameForDifficulty(difficulty) {
+  switch (difficulty) {
+    case "BEGINNER":
+      return "beginner";
+    case "NORMAL":
+      return "normal";
+    case "HYPER":
+      return "hyper";
+    case "ANOTHER":
+      return "another";
+    case "LEGGENDARIA":
+      return "leggendaria";
+    default:
+      throw new Error(`Unexpected difficulty: ${difficulty}`);
+  }
 }
 
 function getClassNameForClearType(clearType) {
