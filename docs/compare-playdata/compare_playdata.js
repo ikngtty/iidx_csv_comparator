@@ -59,8 +59,12 @@ buttonCompare.addEventListener("click", () => {
 
 function addComparisonRow(tbody, comparison) {
   const row = tbody.insertRow();
+
   row.insertCell().textContent = comparison.chart.song.version;
-  row.insertCell().textContent = comparison.chart.song.title;
+
+  const titleCell = row.insertCell();
+  titleCell.textContent = comparison.chart.song.title;
+  titleCell.classList.add("song-title");
 
   const difficultyCell = row.insertCell();
   difficultyCell.textContent = comparison.chart.difficulty;
@@ -73,11 +77,13 @@ function addComparisonRow(tbody, comparison) {
   const clearType1Cell = row.insertCell();
   clearType1Cell.textContent = comparison.result1?.clearType;
   clearType1Cell.classList.add(
+    "clear-type",
     getClassNameForClearType(comparison.result1?.clearType),
   );
   const clearType2Cell = row.insertCell();
   clearType2Cell.textContent = comparison.result2?.clearType;
   clearType2Cell.classList.add(
+    "clear-type",
     getClassNameForClearType(comparison.result2?.clearType),
   );
 

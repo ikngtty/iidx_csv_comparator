@@ -1,3 +1,15 @@
+#tableComparison .song-title {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+
+#tableComparison .clear-type {
+  max-width: 120px;
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+
 .beginner {
   background-color: #80d880;
 }
