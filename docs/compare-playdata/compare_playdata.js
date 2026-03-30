@@ -69,8 +69,14 @@ function addComparisonRow(tbody, comparison) {
   row.insertCell().textContent = comparison.result2?.missCount;
   row.insertCell().textContent = comparison.result1?.djLevel;
   row.insertCell().textContent = comparison.result2?.djLevel;
-  row.insertCell().textContent = comparison.result1?.score;
-  row.insertCell().textContent = comparison.result2?.score;
+
+  const score1Cell = row.insertCell();
+  score1Cell.textContent = comparison.result1?.score;
+  score1Cell.classList.add(comparison.scoreWinLose1);
+  const score2Cell = row.insertCell();
+  score2Cell.textContent = comparison.result2?.score;
+  score2Cell.classList.add(comparison.scoreWinLose2);
+
   row.insertCell().textContent = comparison.scoreDiff;
 }
 
@@ -121,6 +127,8 @@ function* makeRecordComparisons(compareChart, records1, records2) {
 }
 
 function makeRecordComparison(chart, result1, result2) {
+  const scoreWinLose1 = judgeScoreWinLose(result1?.score, result2?.score);
+  const scoreWinLose2 = judgeScoreWinLose(result2?.score, result1?.score);
   const scoreDiff =
     result1?.score == null || result2?.score == null
       ? null
@@ -129,6 +137,16 @@ function makeRecordComparison(chart, result1, result2) {
     chart,
     result1,
     result2,
+    scoreWinLose1,
+    scoreWinLose2,
     scoreDiff,
   };
+}
+
+function judgeScoreWinLose(score1, score2) {
+  if (score1 == null) return "noplay";
+  if (score2 == null) return "win";
+  if (score1 > score2) return "win";
+  if (score1 < score2) return "lose";
+  return "draw";
 }
