@@ -122,10 +122,7 @@ function* makeRecordComparisons(compareChart, records1, records2) {
 
 function makeRecordComparison(chart, result1, result2) {
   const scoreDiff =
-    result1 == null ||
-    result1.score == 0 ||
-    result2 == null ||
-    result2.score == 0
+    result1?.score == null || result2?.score == null
       ? null
       : result1.score - result2.score;
   return {

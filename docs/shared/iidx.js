@@ -120,11 +120,37 @@ export function* parseIidxCsv(text) {
         level,
       };
 
+      const missCountText = row[`${difficulty} ミスカウント`];
+      const missCount = (() => {
+        if (missCountText === "---") return null;
+
+        const num = Number(missCountText);
+        if (isNaN(num)) {
+          throw new Error(`Unexpected miss count: "${missCountText}"`);
+        }
+        return num;
+      })();
+
+      const djLevelText = row[`${difficulty} DJ LEVEL`];
+      const djLevel = djLevelText === "---" ? null : djLevelText;
+
+      const scoreText = row[`${difficulty} スコア`];
+      const score = (() => {
+        const num = Number(scoreText);
+        if (isNaN(num)) {
+          throw new Error(`Unexpected score: "${scoreText}"`);
+        }
+        if (num === 0) {
+          return null;
+        }
+        return num;
+      })();
+
       const result = {
         clearType: row[`${difficulty} クリアタイプ`],
-        missCount: row[`${difficulty} ミスカウント`],
-        djLevel: row[`${difficulty} DJ LEVEL`],
-        score: row[`${difficulty} スコア`],
+        missCount,
+        djLevel,
+        score,
       };
 
       yield { chart, result };
