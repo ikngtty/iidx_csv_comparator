@@ -58,15 +58,9 @@ buttonCompare.addEventListener("click", () => {
   );
 
   const compareRecordOrder = mergeComparators(
-    (record1, record2) =>
-      compareVersionName(
-        record1.chart.song.version,
-        record2.chart.song.version,
-      ),
-    (record1, record2) =>
-      compareSongTitle(record1.chart.song.title, record2.chart.song.title),
-    (record1, record2) =>
-      compareDifficulty(record1.chart.difficulty, record2.chart.difficulty),
+    compareRecordOrderByVersionName,
+    compareRecordOrderBySongTitle,
+    compareRecordOrderByDifficulty,
   );
   const comparisons = makeRecordComparisons(
     compareRecordOrder,
@@ -258,4 +252,19 @@ function judgeScoreWinLose(score1, score2) {
   if (score1 > score2) return "win";
   if (score1 < score2) return "lose";
   return "draw";
+}
+
+function compareRecordOrderByVersionName(record1, record2) {
+  return compareVersionName(
+    record1.chart.song.version,
+    record2.chart.song.version,
+  );
+}
+
+function compareRecordOrderBySongTitle(record1, record2) {
+  return compareSongTitle(record1.chart.song.title, record2.chart.song.title);
+}
+
+function compareRecordOrderByDifficulty(record1, record2) {
+  return compareDifficulty(record1.chart.difficulty, record2.chart.difficulty);
 }
