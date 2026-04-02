@@ -228,6 +228,10 @@ function makeRecordComparison(chart, result1, result2) {
     result1?.score == null || result2?.score == null
       ? null
       : result1.score - result2.score;
+  const nominalScoreDiff =
+    result1?.score == null && result2?.score == null
+      ? null
+      : (result1?.score ?? 0) - (result2?.score ?? 0);
   return {
     chart,
     result1,
@@ -237,6 +241,7 @@ function makeRecordComparison(chart, result1, result2) {
     scoreWinLose1,
     scoreWinLose2,
     scoreDiff,
+    nominalScoreDiff,
   };
 }
 
@@ -335,21 +340,13 @@ function compareComparisonOrderByScoreDiff(comparison1, comparison2) {
   if (diff1 == null && diff2 != null) return 1;
   if (diff1 != null && diff2 == null) return -1;
 
-  const getNominalDiff = (comparison) => {
-    const score1 = comparison.result1?.score;
-    const score2 = comparison.result2?.score;
-    if (score1 == null && score2 == null) return null;
-    return (score1 ?? 0) - (score2 ?? 0);
-  };
+  const nomDiff1 = comparison1.nominalScoreDiff;
+  const nomDiff2 = comparison2.nominalScoreDiff;
 
-  const nominalDiff1 = getNominalDiff(comparison1);
-  const nominalDiff2 = getNominalDiff(comparison2);
+  if (nomDiff1 != null && nomDiff2 != null) return nomDiff2 - nomDiff1;
 
-  if (nominalDiff1 != null && nominalDiff2 != null)
-    return nominalDiff2 - nominalDiff1;
-
-  if (nominalDiff1 == null && nominalDiff2 != null) return 1;
-  if (nominalDiff1 != null && nominalDiff2 == null) return -1;
+  if (nomDiff1 == null && nomDiff2 != null) return 1;
+  if (nomDiff1 != null && nomDiff2 == null) return -1;
 
   return 0;
 }
