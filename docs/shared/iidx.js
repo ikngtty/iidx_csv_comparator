@@ -44,6 +44,17 @@ export const DIFFICULTIES = [
   "LEGGENDARIA",
 ];
 
+export const CLEAR_TYPES = [
+  "NO PLAY",
+  "FAILED",
+  "ASSIST CLEAR",
+  "EASY CLEAR",
+  "CLEAR",
+  "HARD CLEAR",
+  "EX HARD CLEAR",
+  "FULLCOMBO CLEAR",
+];
+
 const VERSION_NUMBER_FOR_NAME = (() => {
   const m = new Map();
   VERSION_NAMES.forEach((name, i) => {
@@ -76,6 +87,22 @@ function getDifficultyOrder(difficulty) {
   return order;
 }
 
+const CLEAR_TYPE_ORDER = (() => {
+  const m = new Map();
+  CLEAR_TYPES.forEach((clearType, i) => {
+    m.set(clearType, i);
+  });
+  return m;
+})();
+
+function getClearTypeOrder(clearType) {
+  const order = CLEAR_TYPE_ORDER.get(clearType);
+  if (order == null) {
+    throw new Error(`Unexpected clear type: ${clearType}`);
+  }
+  return order;
+}
+
 const SONG_TITLE_COLLATOR = new Intl.Collator("ja");
 
 export function compareVersionName(ver1, ver2) {
@@ -96,6 +123,12 @@ export function compareDifficulty(dif1, dif2) {
 
 export function compareLevel(level1, level2) {
   return level1 - level2;
+}
+
+export function compareClearType(clearType1, clearType2) {
+  const order1 = getClearTypeOrder(clearType1);
+  const order2 = getClearTypeOrder(clearType2);
+  return order1 - order2;
 }
 
 export function checkIidxCsv(text) {

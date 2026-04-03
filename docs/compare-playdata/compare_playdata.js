@@ -1,4 +1,5 @@
 import {
+  compareClearType,
   compareDifficulty,
   compareLevel,
   compareSongTitle,
@@ -304,6 +305,7 @@ function getComparatorOfRecordOrder(sortBy) {
   switch (sortBy) {
     case "version":
     case "scoreDiff":
+    case "clearDiff":
       return mergeComparators(
         compareRecordOrderByVersionName,
         compareRecordOrderBySongTitle,
@@ -339,6 +341,14 @@ function getComparatorOfComparisonOrder(sortBy) {
         compareComparisonOrderByScoreDiff,
         compareComparisonOrderByVersionName,
         compareComparisonOrderBySongTitle,
+        compareComparisonOrderByDifficulty,
+      );
+    case "clearDiff":
+      return mergeComparators(
+        compareComparisonOrderByClearDiff,
+        compareComparisonOrderByLevelDesc,
+        compareComparisonOrderBySongTitle,
+        compareComparisonOrderByVersionName,
         compareComparisonOrderByDifficulty,
       );
     default:
@@ -390,6 +400,28 @@ function compareComparisonOrderByDifficulty(comparison1, comparison2) {
   );
 }
 
+function compareComparisonOrderByLevelAsc(comparison1, comparison2) {
+  return compareLevel(comparison1.chart.level, comparison2.chart.level);
+}
+
+function compareComparisonOrderByLevelDesc(comparison1, comparison2) {
+  return compareLevel(comparison2.chart.level, comparison1.chart.level);
+}
+
+function compareComparisonOrderByPlayer1ClearType(comparison1, comparison2) {
+  return compareClearType(
+    comparison1.result1?.clearType ?? "NO PLAY",
+    comparison2.result1?.clearType ?? "NO PLAY",
+  );
+}
+
+function compareComparisonOrderByPlayer2ClearType(comparison1, comparison2) {
+  return compareClearType(
+    comparison1.result2?.clearType ?? "NO PLAY",
+    comparison2.result2?.clearType ?? "NO PLAY",
+  );
+}
+
 function compareComparisonOrderByScoreDiff(comparison1, comparison2) {
   const diff1 = comparison1.scoreDiff;
   const diff2 = comparison2.scoreDiff;
@@ -408,4 +440,71 @@ function compareComparisonOrderByScoreDiff(comparison1, comparison2) {
   if (nomDiff1 != null && nomDiff2 == null) return -1;
 
   return 0;
+}
+
+function compareComparisonOrderByClearDiff(comparison1, comparison2) {
+  // 勝敗による順序付け
+  const winLoseOrder1 = getComparisonOrderByClearDiffWinLose(comparison1);
+  const winLoseOrder2 = getComparisonOrderByClearDiffWinLose(comparison2);
+  const winLoseOrderDelta = winLoseOrder1 - winLoseOrder2;
+  if (winLoseOrderDelta !== 0) {
+    return winLoseOrderDelta;
+  }
+
+  // 勝敗が同じ場合の、より細かい順序付け
+  switch (winLoseOrder1) {
+    // 両者NO PLAY同士
+    case 2:
+      return 0;
+
+    // 引き分け同士
+    case 0:
+      // クリアランプの強い方を先にする
+      return compareComparisonOrderByPlayer1ClearType(comparison2, comparison1);
+
+    // プレイヤー1の勝ち同士
+    case -1: {
+      // プレイヤー1のクリアランプの強い方を先にする
+      const player1ClearTypeDelta = compareComparisonOrderByPlayer1ClearType(
+        comparison2,
+        comparison1,
+      );
+      if (player1ClearTypeDelta !== 0) {
+        return player1ClearTypeDelta;
+      }
+      // プレイヤー1のクリアランプが同じなら、プレイヤー2のクリアランプの弱い方を先にする
+      return compareComparisonOrderByPlayer2ClearType(comparison1, comparison2);
+    }
+
+    // プレイヤー2の勝ち同士
+    case 1: {
+      // プレイヤー2のクリアランプの弱い方を先にする
+      const player2ClearTypeDelta = compareComparisonOrderByPlayer2ClearType(
+        comparison1,
+        comparison2,
+      );
+      if (player2ClearTypeDelta !== 0) {
+        return player2ClearTypeDelta;
+      }
+      // プレイヤー2のクリアランプが同じなら、プレイヤー1のクリアランプの強い方を先にする
+      return compareComparisonOrderByPlayer1ClearType(comparison2, comparison1);
+    }
+
+    default:
+      throw new Error(`Unexpected win-lose order: ${winLoseOrder1}`);
+  }
+}
+
+function getComparisonOrderByClearDiffWinLose(comparison) {
+  // プレイヤー1の勝ち -> 引き分け -> プレイヤー2の勝ち -> 両者NO PLAY
+
+  const clearType1 = comparison.result1?.clearType ?? "NO PLAY";
+  const clearType2 = comparison.result2?.clearType ?? "NO PLAY";
+
+  if (clearType1 === "NO PLAY" && clearType2 === "NO PLAY") return 2; // 両者NO PLAY
+
+  const delta = compareClearType(clearType1, clearType2);
+  if (delta > 0) return -1; // プレイヤー1の勝ち
+  if (delta < 0) return 1; // プレイヤー2の勝ち
+  return 0; // 引き分け
 }
