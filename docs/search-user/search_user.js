@@ -17,9 +17,8 @@ const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
 
 buttonSearch.addEventListener("click", async () => {
-  const tbody = tableUsers.tBodies[0];
-
   // テーブルのリセット
+  const tbody = tableUsers.tBodies[0];
   tbody.replaceChildren();
 
   const userProfilesSnapshot = await getDocsFromServer(

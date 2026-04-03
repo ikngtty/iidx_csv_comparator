@@ -51,9 +51,8 @@ buttonCompare.addEventListener("click", () => {
     }
   }
 
-  const tbody = tableComparison.tBodies[0];
-
   // テーブルのリセット
+  const tbody = tableComparison.tBodies[0];
   tbody.replaceChildren();
 
   const [records1, records2] = inputsCsv.map((inputCsv) =>
