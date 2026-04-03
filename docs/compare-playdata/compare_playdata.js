@@ -8,12 +8,14 @@ import { mergeComparators } from "../shared/util.js";
 import ValidatableField from "../shared/validation/validatable_field.js";
 import { RuleIidxCsv } from "../shared/validation/rules/iidx.js";
 
-// TODO: 並び替え順の変更時即時反映 or 変更値と表示の不一致を明示（一致してる時は比較ボタンを押せなくするとか）
+// TODO: 絞り込み条件・並び替え順の変更時即時反映 or 変更値と表示の不一致を明示（一致してる時は比較ボタンを押せなくするとか）
+// TODO: 絞り込み条件・並び替え順の状態保存・復元
 
 const inputsCsv = [1, 2].map((i) => document.getElementById(`inputCsv${i}`));
 const warningCaptionsCsv = [1, 2].map((i) =>
   document.getElementById(`warningCaptionCsv${i}`),
 );
+const selectFilterLevel = document.getElementById("selectFilterLevel");
 const selectSortBy = document.getElementById("selectSortBy");
 const buttonCompare = document.getElementById("buttonCompare");
 const tableComparison = document.getElementById("tableComparison");
@@ -55,10 +57,14 @@ buttonCompare.addEventListener("click", () => {
   const tbody = tableComparison.tBodies[0];
   tbody.replaceChildren();
 
-  const [records1, records2] = inputsCsv.map((inputCsv) =>
-    parseIidxCsv(inputCsv.value),
-  );
+  const filter = getFilterFromForm();
   const sortBy = selectSortBy.value;
+
+  const [records1, records2] = inputsCsv.map((inputCsv) => {
+    const allRecords = parseIidxCsv(inputCsv.value);
+    const filteredRecords = applyFilterToRecords(allRecords, filter);
+    return filteredRecords;
+  });
 
   const compareRecordOrder = getComparatorOfRecordOrder(sortBy);
   const comparisons = makeRecordComparisons(
@@ -66,10 +72,11 @@ buttonCompare.addEventListener("click", () => {
     records1,
     records2,
   );
+  const filteredComparisons = applyFilterToComparisons(comparisons, filter);
   const compareComparisonOrder = getComparatorOfComparisonOrder(sortBy);
   const sortedComparisons = compareComparisonOrder
-    ? [...comparisons].sort(compareComparisonOrder)
-    : comparisons;
+    ? [...filteredComparisons].sort(compareComparisonOrder)
+    : filteredComparisons;
 
   for (const comparison of sortedComparisons) {
     addComparisonRow(tbody, comparison);
@@ -124,6 +131,21 @@ function addComparisonRow(tbody, comparison) {
   score2Cell.classList.add(comparison.scoreWinLose2);
 
   row.insertCell().textContent = comparison.scoreDiff;
+}
+
+function getFilterFromForm() {
+  const level = parseFilterLevel(selectFilterLevel.value);
+  return { level };
+}
+
+function parseFilterLevel(text) {
+  if (text === "all") return null;
+
+  const num = Number(text);
+  if (isNaN(num)) {
+    throw new Error(`Unexpected filter level: "${text}"`);
+  }
+  return num;
 }
 
 function getClassNameForDifficulty(difficulty) {
@@ -260,6 +282,21 @@ function judgeScoreWinLose(score1, score2) {
   if (score1 > score2) return "win";
   if (score1 < score2) return "lose";
   return "draw";
+}
+
+function* applyFilterToRecords(records, filter) {
+  for (const record of records) {
+    if (filter.level != null && record.chart.level !== filter.level) {
+      continue;
+    }
+    yield record;
+  }
+}
+
+function* applyFilterToComparisons(comparisons, filter) {
+  for (const comparison of comparisons) {
+    yield comparison;
+  }
 }
 
 function getComparatorOfRecordOrder(sortBy) {
