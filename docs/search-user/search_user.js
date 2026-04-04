@@ -26,47 +26,7 @@ buttonSearch.addEventListener("click", async () => {
   );
 
   userProfilesSnapshot.forEach((userProfileDoc) => {
-    const userProfile = userProfileDoc.data();
-    const userId = userProfileDoc.id;
-
-    const row = tbody.insertRow();
-    row.insertCell().textContent = userProfile.userName;
-    row.insertCell().textContent = userProfile.djName;
-    row.insertCell().textContent = userProfile.iidxId;
-
-    const uploadedAtCell = row.insertCell();
-    uploadedAtCell.appendChild(
-      document.createTextNode(
-        firestoreTimestampToString(userProfile.playdataSpUploadedAt),
-      ),
-    );
-    uploadedAtCell.appendChild(document.createElement("br"));
-    uploadedAtCell.appendChild(
-      document.createTextNode(
-        firestoreTimestampToString(userProfile.playdataDpUploadedAt),
-      ),
-    );
-
-    const buttonsToCompareCell = row.insertCell();
-    [
-      ["sp", "SP", userProfile.playdataSpUploadedAt],
-      ["dp", "DP", userProfile.playdataDpUploadedAt],
-    ].forEach(([playside, playsideLabel, uploadedAt]) => {
-      [1, 2].forEach((playerIndex) => {
-        const button = document.createElement("button");
-        button.textContent = `${playsideLabel}のデータをPlayer${playerIndex}にセット`;
-        if (uploadedAt == null) {
-          button.disabled = true;
-        } else {
-          button.dataset.userId = userId;
-          button.dataset.playside = playside;
-          button.dataset.playerIndex = playerIndex;
-          button.addEventListener("click", handleButtonCompareClick);
-        }
-        buttonsToCompareCell.appendChild(button);
-      });
-      buttonsToCompareCell.appendChild(document.createElement("br"));
-    });
+    addUserRow(tbody, userProfileDoc.id, userProfileDoc.data());
   });
 });
 
@@ -79,4 +39,45 @@ async function handleButtonCompareClick(event) {
 
   localStorage.setItem(`iidxComparator.csv${playerIndex}`, playdata);
   location.href = "../compare-playdata/";
+}
+
+function addUserRow(tbody, userId, userProfile) {
+  const row = tbody.insertRow();
+  row.insertCell().textContent = userProfile.userName;
+  row.insertCell().textContent = userProfile.djName;
+  row.insertCell().textContent = userProfile.iidxId;
+
+  const uploadedAtCell = row.insertCell();
+  uploadedAtCell.appendChild(
+    document.createTextNode(
+      firestoreTimestampToString(userProfile.playdataSpUploadedAt),
+    ),
+  );
+  uploadedAtCell.appendChild(document.createElement("br"));
+  uploadedAtCell.appendChild(
+    document.createTextNode(
+      firestoreTimestampToString(userProfile.playdataDpUploadedAt),
+    ),
+  );
+
+  const buttonsToCompareCell = row.insertCell();
+  [
+    ["sp", "SP", userProfile.playdataSpUploadedAt],
+    ["dp", "DP", userProfile.playdataDpUploadedAt],
+  ].forEach(([playside, playsideLabel, uploadedAt]) => {
+    [1, 2].forEach((playerIndex) => {
+      const button = document.createElement("button");
+      button.textContent = `${playsideLabel}のデータをPlayer${playerIndex}にセット`;
+      if (uploadedAt == null) {
+        button.disabled = true;
+      } else {
+        button.dataset.userId = userId;
+        button.dataset.playside = playside;
+        button.dataset.playerIndex = playerIndex;
+        button.addEventListener("click", handleButtonCompareClick);
+      }
+      buttonsToCompareCell.appendChild(button);
+    });
+    buttonsToCompareCell.appendChild(document.createElement("br"));
+  });
 }
