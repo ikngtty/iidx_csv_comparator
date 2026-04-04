@@ -136,8 +136,19 @@ function addComparisonRow(tbody, comparison) {
 }
 
 function getFilterFromForm() {
+  const difficulties = getDifficultyFiltersFromForm();
   const level = parseFilterLevel(selectFilterLevel.value);
-  return { level };
+  return { difficulties, level };
+}
+
+function getDifficultyFiltersFromForm() {
+  const checkboxes = document.querySelectorAll('input[name="difficulty"]');
+  return Object.fromEntries(
+    Array.from(checkboxes).map((checkbox) => [
+      checkbox.value,
+      checkbox.checked,
+    ]),
+  );
 }
 
 function parseFilterLevel(text) {
@@ -288,6 +299,9 @@ function judgeScoreWinLose(score1, score2) {
 
 function* applyFilterToRecords(records, filter) {
   for (const record of records) {
+    if (!filter.difficulties[record.chart.difficulty]) {
+      continue;
+    }
     if (filter.level != null && record.chart.level !== filter.level) {
       continue;
     }
