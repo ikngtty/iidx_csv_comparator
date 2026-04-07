@@ -17,24 +17,37 @@ import { firestoreTimestampToString } from "../shared/util.js";
 import ValidatableField from "../shared/validation/validatable_field.js";
 import {
   RuleJustLength,
+  RuleMaxLength,
   RuleNumeric,
 } from "../shared/validation/rules/common.js";
 
 const USER_PROFILE_COUNT_PER_PAGE = 10;
 
+const inputDisplayName = document.getElementById("inputDisplayName");
+const warningCaptionDisplayName = document.getElementById(
+  "warningCaptionDisplayName",
+);
 const inputIidxId = document.getElementById("inputIidxId");
 const warningCaptionIidxId = document.getElementById("warningCaptionIidxId");
 const buttonSearch = document.getElementById("buttonSearch");
 const tableUsers = document.getElementById("tableUsers");
 const buttonSearchNext = document.getElementById("buttonSearchNext");
 
+const validatableFieldDisplayName = new ValidatableField(
+  inputDisplayName,
+  warningCaptionDisplayName,
+  [new RuleMaxLength(30)],
+);
 const validatableFieldIidxId = new ValidatableField(
   inputIidxId,
   warningCaptionIidxId,
   [new RuleJustLength(8), new RuleNumeric()],
 );
 
-const validatableFilterFileds = [validatableFieldIidxId];
+const validatableFilterFileds = [
+  validatableFieldDisplayName,
+  validatableFieldIidxId,
+];
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
@@ -60,15 +73,27 @@ buttonSearch.addEventListener("click", async () => {
   const tbody = tableUsers.tBodies[0];
   tbody.replaceChildren();
 
+  // クエリの組み立て
+  // TODO: 条件の複合はユースケースとしても要らないし、インデックスの管理がだるいのでやめたい。
   const filter = getFilterFromForm();
   const constraints = [];
+  if (filter.displayName) {
+    constraints.push(where("userName", ">=", filter.displayName));
+    constraints.push(
+      where("userName", "<=", filter.displayName + "\u{10FFFF}"),
+    );
+  }
   if (filter.iidxId) {
     constraints.push(where("iidxId", "==", filter.iidxId));
   }
-
+  if (constraints.length === 0) {
+    // NOTE: where句がある場合はそれがorderByの基準となる。
+    // 複合インデックスをむやみに増やしたくないので、それで良いとする。
+    // TODO: そもそも全件検索をさせたくない（無料枠を超えにくいようにするため）。
+    constraints.push(orderBy("createdAt", "desc"));
+  }
   const searchQuery = query(
     collection(db, "userProfiles"),
-    orderBy("createdAt", "desc"),
     limit(USER_PROFILE_COUNT_PER_PAGE + 1),
     ...constraints,
   );
@@ -167,6 +192,7 @@ function addUserRow(tbody, userId, userProfile) {
 
 function getFilterFromForm() {
   return {
+    displayName: inputDisplayName.value.trim(),
     iidxId: inputIidxId.value.trim(),
   };
 }
