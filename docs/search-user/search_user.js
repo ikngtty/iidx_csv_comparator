@@ -27,6 +27,8 @@ const inputDisplayName = document.getElementById("inputDisplayName");
 const warningCaptionDisplayName = document.getElementById(
   "warningCaptionDisplayName",
 );
+const inputDjName = document.getElementById("inputDjName");
+const warningCaptionDjName = document.getElementById("warningCaptionDjName");
 const inputIidxId = document.getElementById("inputIidxId");
 const warningCaptionIidxId = document.getElementById("warningCaptionIidxId");
 const buttonSearch = document.getElementById("buttonSearch");
@@ -37,6 +39,11 @@ const validatableFieldDisplayName = new ValidatableField(
   inputDisplayName,
   warningCaptionDisplayName,
   [new RuleMaxLength(30)],
+);
+const validatableFieldDjName = new ValidatableField(
+  inputDjName,
+  warningCaptionDjName,
+  [new RuleMaxLength(6)],
 );
 const validatableFieldIidxId = new ValidatableField(
   inputIidxId,
@@ -55,6 +62,18 @@ const filterAreas = {
     },
     disable() {
       inputDisplayName.disabled = true;
+    },
+  },
+  djName: {
+    validatableFields: [validatableFieldDjName],
+    clear() {
+      inputDjName.value = "";
+    },
+    enable() {
+      inputDjName.disabled = false;
+    },
+    disable() {
+      inputDjName.disabled = true;
     },
   },
   iidxId: {
@@ -108,6 +127,15 @@ buttonSearch.addEventListener("click", async () => {
       constraints.push(
         where("userName", "<=", displayNameFilter + "\u{10FFFF}"),
       );
+      break;
+    }
+
+    case "djName": {
+      const djNameFilter = inputDjName.value.trim();
+      if (!djNameFilter) break;
+
+      constraints.push(where("djName", ">=", djNameFilter));
+      constraints.push(where("djName", "<=", djNameFilter + "\u{10FFFF}"));
       break;
     }
 
