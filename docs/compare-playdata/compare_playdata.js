@@ -1,6 +1,7 @@
 import {
   compareClearType,
   compareDifficulty,
+  compareDjLevel,
   compareLevel,
   compareSongTitle,
   compareVersionName,
@@ -320,6 +321,8 @@ function getComparatorOfRecordOrder(sortBy) {
     case "version":
     case "scoreDiff":
     case "clearDiff":
+    case "djLevel1":
+    case "djLevel2":
     case "player1MissCount":
     case "player2MissCount":
       return mergeComparators(
@@ -363,6 +366,24 @@ function getComparatorOfComparisonOrder(sortBy) {
       return mergeComparators(
         compareComparisonOrderByClearDiff,
         compareComparisonOrderByLevelDesc,
+        compareComparisonOrderBySongTitle,
+        compareComparisonOrderByVersionName,
+        compareComparisonOrderByDifficulty,
+      );
+    case "djLevel1":
+      return mergeComparators(
+        compareComparisonOrderByPlayer1DjLevelDesc,
+        compareComparisonOrderByLevelDesc,
+        compareComparisonOrderByPlayer2DjLevelDesc,
+        compareComparisonOrderBySongTitle,
+        compareComparisonOrderByVersionName,
+        compareComparisonOrderByDifficulty,
+      );
+    case "djLevel2":
+      return mergeComparators(
+        compareComparisonOrderByPlayer2DjLevelDesc,
+        compareComparisonOrderByLevelDesc,
+        compareComparisonOrderByPlayer1DjLevelDesc,
         compareComparisonOrderBySongTitle,
         compareComparisonOrderByVersionName,
         compareComparisonOrderByDifficulty,
@@ -462,6 +483,20 @@ function compareComparisonOrderByPlayer2ClearType(comparison1, comparison2) {
   return compareClearType(
     comparison1.result2?.clearType ?? "NO PLAY",
     comparison2.result2?.clearType ?? "NO PLAY",
+  );
+}
+
+function compareComparisonOrderByPlayer1DjLevelDesc(comparison1, comparison2) {
+  return compareDjLevel(
+    comparison2.result1?.djLevel ?? "",
+    comparison1.result1?.djLevel ?? "",
+  );
+}
+
+function compareComparisonOrderByPlayer2DjLevelDesc(comparison1, comparison2) {
+  return compareDjLevel(
+    comparison2.result2?.djLevel ?? "",
+    comparison1.result2?.djLevel ?? "",
   );
 }
 

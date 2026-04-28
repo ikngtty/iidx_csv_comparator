@@ -55,6 +55,8 @@ export const CLEAR_TYPES = [
   "FULLCOMBO CLEAR",
 ];
 
+export const DJ_LEVELS = ["", "F", "E", "D", "C", "B", "A", "AA", "AAA"];
+
 const VERSION_NUMBER_FOR_NAME = (() => {
   const m = new Map();
   VERSION_NAMES.forEach((name, i) => {
@@ -103,6 +105,22 @@ function getClearTypeOrder(clearType) {
   return order;
 }
 
+const DJ_LEVEL_ORDER = (() => {
+  const m = new Map();
+  DJ_LEVELS.forEach((djLevel, i) => {
+    m.set(djLevel, i);
+  });
+  return m;
+})();
+
+function getDjLevelOrder(djLevel) {
+  const order = DJ_LEVEL_ORDER.get(djLevel);
+  if (order == null) {
+    throw new Error(`Unexpected DJ level: ${djLevel}`);
+  }
+  return order;
+}
+
 const SONG_TITLE_COLLATOR = new Intl.Collator("ja");
 
 export function compareVersionName(ver1, ver2) {
@@ -128,6 +146,12 @@ export function compareLevel(level1, level2) {
 export function compareClearType(clearType1, clearType2) {
   const order1 = getClearTypeOrder(clearType1);
   const order2 = getClearTypeOrder(clearType2);
+  return order1 - order2;
+}
+
+export function compareDjLevel(djLevel1, djLevel2) {
+  const order1 = getDjLevelOrder(djLevel1);
+  const order2 = getDjLevelOrder(djLevel2);
   return order1 - order2;
 }
 
